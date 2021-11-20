@@ -1,2 +1,2 @@
 # python-Mqtt-Csv
-saving the data coming from the serial port of the computer or the device in operation to the csv file, sending it to the determined mqtt server with the determined topics.
+The device is targeted by reading the serial port. The data listened to by the computer is logged with the ".csv" extension. At the same time, the data is sent to the specified mqtt server with the specified topic. 
