@@ -9,15 +9,15 @@ from typing import Union
 from serial.tools.list_ports_common import ListPortInfo
 from serial.tools.list_ports_windows import get_parent_serial_number
 
-broker = "31.220.62.152"  # server id
-port = 1883  # port numarası
+broker = "xxxx"  # server id
+port = 1883  # port number
 baud = 9600  # stm runs at 9600 baud
 fil_name = "analog-data.csv"  # name of the CSV file generated file_name
-samples = 100  # alınacak örnek adedi
+samples = 100  #  number of samples of data 
 print_labes = False
 timeout = 1
 
-# Port ve port bilgilerini veren fonksiyon .
+#Parsing received device information .
 def print_devices() -> None:
     ports = list_ports.comports()
 
@@ -34,8 +34,7 @@ def print_devices() -> None:
         pass
 
 
-# Port ve port bilgilerini veren fonksiyon .
-def find_device(device_name: str) -> Union[str, None]:
+#Function that gives information about the port and the device connected to the port.def find_device(device_name: str) -> Union[str, None]:
     ports = list_ports.comports()
 
     for port in ports:
@@ -51,13 +50,13 @@ arduino_port = find_device("ch340")
 if arduino_port == find_device("ch340"):
     ser = serial.Serial(str(arduino_port), baudrate=9600)
 
-    ("Connected to Stm port:" + arduino_port)
+    ("Connected to Arduino port:" + arduino_port)
     file = open(fil_name, "a")
     print("Created file")
     line = 0
 
     def on_publish(client, userdata, result):  # create function for callback
-        print("data yayinlandi")
+        print("data published")
 
     client1 = paho.Client("oda")  # create client object
     client1.on_publish = on_publish  # assign function to callback
@@ -70,12 +69,14 @@ if arduino_port == find_device("ch340"):
             else:
                 print("Line " + str(line) + ":writing...")
         getData = str(ser.readline().decode("utf-8"))[:-2]
-
+  #For observing incoming data. The first and last characters are not imported .
         print(
-            "gelen veri " + getData,
+            "Get Data :  " + getData,
             f"{repr(getData[0])} | {repr(getData[-2])}  |{repr(getData[-1])}",
         )
-
+  #if the initial expression is "?" and the last sign "#" takes the data and saves it. Between the data ";" has been placed.
+  # also the spilt function; it separates the data from where it sees. 
+  #";" The reason for putting it is that it is requested to be saved properly in the ".csv" extension file.
         if getData.startswith("?") and getData[-1].endswith("#"):
             data = getData[1:-1]
 
@@ -86,8 +87,8 @@ if arduino_port == find_device("ch340"):
             FLAG = False
 
         if FLAG:
-            print("mesaj yazildi")
-            ret_msg = [client1.publish(f"oda/Cells{i+1}", data[i]) for i in range(10)]
+            print("Message Writed")
+            ret_msg = [client1.publish(f"room/sensors1{i+1}", data[i]) for i in range(10)]
             file = open(fil_name, "a")  # append the data to the file
             file.write(",".join(data) + "\n")  # write data with a newline
             line = line + 1
